@@ -24,9 +24,10 @@ const Verify = () => {
         if (response.data.success) {
             setCartItems({})
             navigate('/orders')
+            toast.success("Thanks for your purchase !")
         } else {
             navigate('/cart')
-            // toast.error("Payment failed")
+            toast.error("Payment failed")
         }
     } catch (error) {
         console.log(error)
