@@ -1,14 +1,13 @@
 
 import orderModel from '../models/orderModel.js'
 import userModel from '../models/userModel.js'
-import Stripe from 'stripe'
+import stripe from '../service/stripe.js'
 
 //Global variables
 const currency = 'eur'
 const deliveryCharge = 10
 
-//Gateway initialize
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
 
 //Placing Order using COD Method (Cash On Delevery)
 const placeOrder = async (req, res) => {
@@ -41,9 +40,10 @@ const placeOrder = async (req, res) => {
 //Placing Order using Stripe Method
 const placeOrderStripe = async (req, res) => {
     try {
+
         const { userId, items, amount, address } = req.body
         const { origin } = req.headers
-
+       
         const orderData = {
             userId,
             items,
@@ -57,16 +57,26 @@ const placeOrderStripe = async (req, res) => {
         const newOrder = new orderModel(orderData)
         await newOrder.save()
 
-        const line_items = items.map((item)=> ({
-            price_data: {
-                currency: currency,
-                product_data: {
-                    name: item.name
-                },
-                unit_amount: item.price * 100
-            },
-            quantity: item.quantity
-        }))
+        const line_items = items.map((item) => (
+            item.stripePriceId
+                ? {
+                    price: item.stripePriceId, // Si stripePriceId est défini, utilise cette structure
+                    quantity: item.quantity
+                } : {
+                    price_data: {
+                        currency: currency,
+                        product_data: {
+                            name: item.name
+                        },
+                        unit_amount: item.price * 100
+                    },
+                    quantity: item.quantity
+                }
+                
+
+
+            
+        ))
 
         line_items.push({
             price_data: {
@@ -80,6 +90,7 @@ const placeOrderStripe = async (req, res) => {
         })
 
         const session = await stripe.checkout.sessions.create({
+            customer: address.stripeCustomerId,
             success_url: `${origin}/verify?success=true&orderId=${newOrder._id}`,
             cancel_url: `${origin}/verify?success=false&orderId=${newOrder._id}`,
             line_items,

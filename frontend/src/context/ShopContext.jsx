@@ -9,13 +9,14 @@ export const ShopContext = createContext();
 const ShopContextProvider = (props) => {
 
     const currency = '€';
-    const delivery_fee = 10;
+    const delivery_fee = 10.00;
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [search,setSearch] = useState('');
     const [showSearch,setShowSearch] = useState(true)
     const [cartItems,setCartItems] = useState({})
     const [products,setProducts] = useState([]);
     const [token,setToken] = useState('')
+    const [userData, setUserData] = useState(null)
     const navigate = useNavigate();
 
     const addToCart = async (itemId,size) => {
@@ -88,6 +89,7 @@ const ShopContextProvider = (props) => {
 
     const getCartAmount = () => {
         let totalAmount = 0
+        
         for(const items in cartItems){
             let itemInfo = products.find((product)=> product._id === items);
             for(const item in cartItems[items]){
@@ -131,6 +133,20 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const getUserData = async (token) => {
+        try {
+            const response = await axios.post(backendUrl + '/api/user/get', {}, {headers: {token}})
+           
+            if(response.data.success) {
+                setUserData(response.data.user)
+
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
     useEffect(()=>{
         getProductsData()
     }, [])
@@ -139,6 +155,7 @@ const ShopContextProvider = (props) => {
         if (!token && localStorage.getItem("token")) {
             setToken(localStorage.getItem("token"))
             getUserCart(localStorage.getItem("token"))
+            getUserData(localStorage.getItem("token"))
         }
     },[])
 
@@ -148,7 +165,7 @@ const ShopContextProvider = (props) => {
         cartItems,addToCart,setCartItems,
         getCartCount,updateQuantity,
         getCartAmount, navigate,backendUrl,
-        setToken,token
+        setToken,token,userData
     }
 
     return (

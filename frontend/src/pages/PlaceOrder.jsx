@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
 import { assets } from "../assets/assets";
@@ -17,7 +17,9 @@ const PlaceOrder = () => {
     getCartAmount,
     delivery_fee,
     products,
+    userData,
   } = useContext(ShopContext);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -95,6 +97,16 @@ const PlaceOrder = () => {
       toast.error(error.message)
     }
   };
+
+  useEffect(()=>{
+    if (userData) {
+      setFormData((prevData) => ({
+          ...prevData,
+          email: userData.email || prevData.email, // Mise à jour du champ email
+          stripeCustomerId: userData.stripeCustomerId
+      }));
+  }
+  }, [userData])
 
   return (
     <form
