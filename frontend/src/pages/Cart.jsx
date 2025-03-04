@@ -3,6 +3,8 @@ import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import CartTotal from "../components/CartTotal";
+import { Link } from 'react-router-dom'
+import { toast } from "react-toastify";
 
 const Cart = () => {
   const { products, currency, cartItems, updateQuantity, navigate } =
@@ -10,6 +12,37 @@ const Cart = () => {
 
   const [cartData, setCartData] = useState([]);
 
+  const handleDelete = (item) => {
+    // Confirm notification before deleting product from cartData.
+    const confirmToast = toast(
+      <div>
+        <p className="text-gray-700 text-xs sm:text-lg font-medium">Are you sure you want to remove this item from your cart?</p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              updateQuantity(item._id, item.size, 0); // Delete product
+              toast.dismiss(confirmToast); // Close notification
+            }}
+            className="bg-red-500 text-white py-1 px-4 rounded"
+          >
+            Delete Product
+          </button>
+          <button
+            onClick={() => toast.dismiss(confirmToast)} // Close notificaiton
+            className="bg-gray-500 text-white py-1 px-4 rounded"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>,
+      {
+        autoClose: false, // La notification ne se ferme pas automatiquement
+        closeOnClick: false, // On ne ferme pas la notification si l'utilisateur clique dessus
+        draggable: false, // Désactiver le drag de la notification
+        hideProgressBar: true, // Ne pas afficher la barre de progression
+      }
+    );
+  }
   useEffect(() => {
     if (products.length > 0) {
       const tempData = [];
@@ -47,15 +80,21 @@ const Cart = () => {
               className="py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4"
             >
               <div className="flex items-start gap-6">
+                {/* Lien vers la page du produit */}
+                <Link to={`/product/${productData._id}`}>
                 <img
                   className="w-16 sm:w-20"
                   src={productData.image[0]}
                   alt=""
+                  
                 />
+                </Link>
                 <div>
+                <Link to={`/product/${productData._id}`}>
                   <p className="text-xs sm:text-lg font-medium">
                     {productData.name}
                   </p>
+                  </Link>
                   <div className="flex items-center gap-5 mt-2">
                     <p>
                       {productData.price} {currency}
@@ -83,8 +122,8 @@ const Cart = () => {
                 defaultValue={item.quantity}
               />
               <img
-                onClick={() => updateQuantity(item._id, item.size, 0)}
-                className="w-4 mr-4 sm:w-5 cursor-pointer"
+                onClick={() => handleDelete(item)}
+                className="w-4 mr-4 sm:w-5 cursor-pointer text-red-500"
                 src={assets.bin_icon}
                 alt=""
               />
