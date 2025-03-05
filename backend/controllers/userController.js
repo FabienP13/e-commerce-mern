@@ -2,8 +2,10 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import validator from 'validator'
 import userModel from '../models/userModel.js';
+import addressModel from '../models/addressModel.js';
 import stripe from '../service/stripe.js'
 import mongoose from "mongoose";
+import { getCode } from 'country-list'
 
 const createToken = (id) => {
     return jwt.sign({id},process.env.JWT_SECRET)
@@ -16,6 +18,9 @@ const getUser = async (req,res) => {
     try {
         const { userId } = req.body 
         const user = await userModel.findById(userId)
+
+        const userAddress = await addressModel.findOne({userId, isActive:true})
+        console.log(userAddress)
         
         res.json({ success: true, user })
 
@@ -55,8 +60,8 @@ const loginUser = async (req,res) => {
 //Route for user registration
 const registerUser = async (req,res) => {
     try {
-        const {name, email, password } = req.body;
-
+        const {firstName, lastName, birthDate,street,city,zipcode,country, email, password } = req.body;
+        
         // Checking user already exists or not
         const exists = await userModel.findOne({email});
 
@@ -69,19 +74,25 @@ const registerUser = async (req,res) => {
             return res.json({success:false, message:"Please enter a valid email."})
         }
         if (password.length < 8) {
-            return res.json({success:false, message:"Please enter a strong email."})
+            return res.json({success:false, message:"Please enter a strong password."})
         }
-
 
         //Generate custom ObjectId
         const customId = new mongoose.Types.ObjectId();
 
         //Creating stripe customer 
         const stripeCustomer = await stripe.customers.create({
-            name: name,
+            name: lastName,
             email: email,
+            address: {
+                city: city,
+                country: getCode(country),
+                line1: street,
+                postal_code: zipcode
+            },
             metadata: {
                 user_id: customId.toString(),
+                birthDate: birthDate
               }
           });
         
@@ -91,14 +102,28 @@ const registerUser = async (req,res) => {
 
         const newUser =  new userModel({
             _id: customId,
-            name,
+            firstName,
+            lastName,
+            birthDate,
             email,
             password: hashedPassword,
             stripeCustomerId: stripeCustomer.id
         })
-
         
         const user = await newUser.save()
+
+        //Creating new address for this user
+
+        const newAddress = new addressModel({
+            userId: customId,
+            street,
+            city,
+            zipcode,
+            country,
+            isActive: true
+        })
+
+        const address = await newAddress.save()
 
         const token = createToken(user._id)
 

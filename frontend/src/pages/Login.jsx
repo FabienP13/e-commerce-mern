@@ -6,43 +6,67 @@ import { toast } from "react-toastify";
 const Login = () => {
   const [currentState, setCurrentState] = useState("Login");
   const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dayOfBirth, setDayOfBirth] = useState("");
+  const [monthOfBirth, setMonthOfBirth] = useState("");
+  const [yearOfBirth, setYearOfBirth] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [zipcode, setZipcode] = useState("");
+  const [country, setCountry] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+
+    let birthDate = Number(new Date(yearOfBirth, monthOfBirth - 1, dayOfBirth));
+
     try {
-      if (currentState === 'Sign Up') {
-        const response = await axios.post(backendUrl + '/api/user/register',{name,email,password})
-        if(response.data.success){
-          setToken(response.data.token)
-          localStorage.setItem('token',response.data.token)
+      if (currentState === "Sign Up") {
+        const response = await axios.post(backendUrl + "/api/user/register", {
+          firstName,
+          lastName,
+          birthDate,
+          street,
+          city,
+          zipcode,
+          country,
+          email,
+          password,
+        });
+        if (response.data.success) {
+          setToken(response.data.token);
+          localStorage.setItem("token", response.data.token);
         } else {
-          toast.error(response.data.message)
+          toast.error(response.data.message);
         }
       } else {
-
-        const response = await axios.post(backendUrl + '/api/user/login', {email,password})
-        if(response.data.success){
-          setToken(response.data.token)
-          localStorage.setItem('token',response.data.token)
+        const response = await axios.post(backendUrl + "/api/user/login", {
+          email,
+          password,
+        });
+        if (response.data.success) {
+          setToken(response.data.token);
+          localStorage.setItem("token", response.data.token);
         } else {
-          toast.error(response.data.message)
+          toast.error(response.data.message);
         }
       }
     } catch (error) {
-      console.log(error)
-      toast.error(error.message)
+      console.log(error);
+      toast.error(error.message);
     }
   };
 
-  useEffect(()=>{
-    if(token){
-      navigate('/')
+  useEffect(() => {
+    if (token) {
+      navigate("/");
     }
-    
-  }, [token])
+  }, [token]);
+
+  const currentYear = new Date().getFullYear() - 18;
 
   return (
     <form
@@ -56,14 +80,107 @@ const Login = () => {
       {currentState === "Login" ? (
         ""
       ) : (
-        <input
-          onChange={(e) => setName(e.target.value)}
-          value={name}
-          type="text"
-          className="w-full px-3 py-2 border border-gray-800"
-          placeholder="Name"
-          required
-        />
+        <>
+          <input
+            onChange={(e) => setFirstName(e.target.value)}
+            value={firstName}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-800"
+            placeholder="First name"
+            required
+          />
+
+          <input
+            onChange={(e) => setLastName(e.target.value)}
+            value={lastName}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-800"
+            placeholder="Last name"
+            required
+          />
+          <div className="flex flex-col sm:flex-row gap-1 w-full">
+            {/* Jour */}
+            <select
+              value={dayOfBirth}
+              onChange={(e) => setDayOfBirth(e.target.value)}
+              className="sm:w-1/3 px-1 py-2 border border-gray-800"
+              required
+            >
+              <option value="">Day</option>
+              {[...Array(31).keys()].map((day) => (
+                <option key={day + 1} value={day + 1}>
+                  {day + 1}
+                </option>
+              ))}
+            </select>
+
+            {/* Mois */}
+            <select
+              value={monthOfBirth}
+              onChange={(e) => setMonthOfBirth(e.target.value)}
+              className="sm:w-1/3 px-1 py-2 border border-gray-800"
+              required
+            >
+              <option value="">Month</option>
+              {[...Array(12).keys()].map((month) => (
+                <option key={month + 1} value={month + 1}>
+                  {month + 1}
+                </option>
+              ))}
+            </select>
+            {/* Année */}
+            <select
+              value={yearOfBirth}
+              onChange={(e) => setYearOfBirth(e.target.value)}
+              className="sm:w-1/3 px-1 py-2 border border-gray-800 max-h-[100px] overflow-auto"
+              required
+            >
+              <option value="">Year</option>
+              {[...Array(currentYear - 1930 + 1).keys()].map((index) => {
+                const year = currentYear - index;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <input
+            onChange={(e) => setStreet(e.target.value)}
+            value={street}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-800"
+            placeholder="Street"
+            required
+          />
+          <div className="flex flex-col sm:flex-row gap-1 w-full">
+            <input
+              onChange={(e) => setCity(e.target.value)}
+              value={city}
+              type="text"
+              className="w-full px-3 py-2 border border-gray-800"
+              placeholder="City"
+              required
+            />
+            <input
+              onChange={(e) => setZipcode(e.target.value)}
+              value={zipcode}
+              type="text"
+              className="w-full sm:w-2/4 px-3 py-2 border border-gray-800"
+              placeholder="Zipcode"
+              required
+            />
+          </div>
+          <input
+            onChange={(e) => setCountry(e.target.value)}
+            value={country}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-800"
+            placeholder="Country"
+            required
+          />
+        </>
       )}
       <input
         onChange={(e) => setEmail(e.target.value)}
