@@ -26,7 +26,6 @@ const PlaceOrder = () => {
     email: "",
     street: "",
     city: "",
-    state: "",
     zipcode: "",
     country: "",
     phone: "",
@@ -102,8 +101,14 @@ const PlaceOrder = () => {
     if (userData) {
       setFormData((prevData) => ({
           ...prevData,
-          email: userData.email || prevData.email, // Mise à jour du champ email
-          stripeCustomerId: userData.stripeCustomerId
+          firstName: userData.user.firstName || prevData.firstName,
+          lastName: userData.user.lastName || prevData.lastName,
+          email: userData.user.email || prevData.email, // Mise à jour du champ email
+          street: userData.userAddress.street || prevData.street,
+          city: userData.userAddress.city || prevData.city,
+          zipcode: userData.userAddress.zipcode || prevData.zipcode,
+          country: userData.userAddress.country || prevData.country,
+          stripeCustomerId: userData.user.stripeCustomerId
       }));
   }
   }, [userData])
@@ -168,17 +173,6 @@ const PlaceOrder = () => {
           />
           <input
             onChange={onChangeHandler}
-            name="state"
-            value={formData.state}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="State"
-            required
-          />
-        </div>
-        <div className="flex gap-3">
-          <input
-            onChange={onChangeHandler}
             name="zipcode"
             value={formData.zipcode}
             className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
@@ -186,6 +180,9 @@ const PlaceOrder = () => {
             placeholder="Zipcode"
             required
           />
+        </div>
+        <div className="flex gap-3">
+          
           <input
             onChange={onChangeHandler}
             name="country"

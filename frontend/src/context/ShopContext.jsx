@@ -19,6 +19,7 @@ const ShopContextProvider = (props) => {
     const [userData, setUserData] = useState(null)
     const navigate = useNavigate();
 
+    
     const addToCart = async (itemId,size) => {
 
         if (!size) {
@@ -138,7 +139,7 @@ const ShopContextProvider = (props) => {
             const response = await axios.post(backendUrl + '/api/user/get', {}, {headers: {token}})
            
             if(response.data.success) {
-                setUserData(response.data.user)
+                setUserData(response.data)
 
             }
         } catch (error) {
@@ -165,7 +166,7 @@ const ShopContextProvider = (props) => {
         cartItems,addToCart,setCartItems,
         getCartCount,updateQuantity,
         getCartAmount, navigate,backendUrl,
-        setToken,token,userData
+        setToken,token,userData,setUserData
     }
 
     return (
