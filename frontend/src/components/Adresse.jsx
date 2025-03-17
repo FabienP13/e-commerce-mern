@@ -5,6 +5,7 @@ import axios from "axios";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import { BsPencil } from "react-icons/bs";
+import FormAddress from "./formAddress";
 
 const Adresse = () => {
   const { backendUrl, token } = useContext(ShopContext);
@@ -23,16 +24,31 @@ const Adresse = () => {
     setSelectedAddress(null);
   };
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
+  const onSubmitHandler = async (formData) => {
+    // e.preventDefault();
+    
+   
     try {
-      const response = await axios.patch(
-        backendUrl + "/api/address/update",
-        {
-          selectedAddress
-        },
-        { headers: { token } }
-      );
+      let response
+      if(formData._id){ //If ._id --> update Address / Else --> add Address
+        response = await axios.patch(
+          backendUrl + "/api/address/update",
+          {
+            formData
+          },
+          { headers: { token } }
+        );
+      } 
+      else {
+        response = await axios.post(
+          backendUrl + "/api/address/add",
+          {
+            formData
+          },
+          { headers: { token } }
+        );
+      }
+      
 
       if (response.data.success) {
         closeModal();
@@ -107,53 +123,17 @@ const Adresse = () => {
           </div>
         </div>
       ))}
+      <div className="flex flex-row justify-center">
+      <button type="button" onClick={() => openModal()} className="bg-black text-white w-[200px] font-light px-8 py-2 mt-4 rounded">Add Address</button>
+
+      </div>
 
 {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="flex flex-col items-center w-full bg-white p-6 rounded-lg shadow-lg w-96">
-            <div className="flex flex-row justify-between items-baseline w-full">
-              <h3 className="text-xl font-bold text-center mb-4">Edit Address</h3>
-              <button onClick={closeModal} className="bg-red-500 text-white px-2  rounded">X</button>
-            </div>
             
-            <form onSubmit={onSubmitHandler} className="flex flex-col w-full gap-3">
-              <p>Street : </p>
-              <input
-                type="text"
-                value={selectedAddress.street}
-                onChange={(e) => setSelectedAddress({ ...selectedAddress, street: e.target.value })}
-                className={`border p-2 rounded focus:border-[#C689A7] focus:border-[3px] focus:outline-none focus:ring-0`}
-                placeholder="Street"
-              />
-              <p> City :</p>
-              <input
-                type="text"
-                value={selectedAddress.city}
-                onChange={(e) => setSelectedAddress({ ...selectedAddress, city: e.target.value })}
-                className="border p-2 rounded focus:border-[#C689A7] focus:border-[3px] focus:outline-none focus:ring-0"
-                placeholder="City"
-              />
-              <p>Zipcode :</p>
-              <input
-                type="text"
-                value={selectedAddress.zipcode}
-                onChange={(e) => setSelectedAddress({ ...selectedAddress, zipcode: e.target.value })}
-                className="border p-2 rounded focus:border-[#C689A7] focus:border-[3px] focus:outline-none focus:ring-0"
-                placeholder="Zipcode"
-              />
-              <p>Country :</p>
-              <input
-                type="text"
-                value={selectedAddress.country}
-                onChange={(e) => setSelectedAddress({ ...selectedAddress, country: e.target.value })}
-                className="border p-2 rounded focus:border-[#C689A7] focus:border-[3px] focus:outline-none focus:ring-0"
-                placeholder="Country"
-              />
-              <div className="flex justify-center mt-1 gap-2">
-                <button type="button" onClick={closeModal} className="bg-gray-500 text-white px-3 py-1 rounded">Cancel</button>
-                <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
-              </div>
-            </form>
+            
+            <FormAddress address={selectedAddress} closeModal={closeModal} onSubmit={onSubmitHandler}/>
           </div>
         </div>
       )}

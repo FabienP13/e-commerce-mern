@@ -21,37 +21,25 @@ const getAllAddressesByUserId = async (req,res) => {
 const addAddress = async (req, res) => {
 
     try {
-        const { userId, addressId, street, city, zipcode, country } = req.body;
+        //Creating new address for this user
+        const { formData, userId } = req.body 
 
-        //Updated datas
-        const updatedData = {
-            street,
-            city,
-            zipcode,
-            country
-        }
+        const newAddress = new addressModel({
+            userId: userId,
+            street: formData.street,
+            city: formData.city,
+            zipcode: formData.zipcode,
+            country: formData.country,
+            isActive: false
+        })
 
-        // Checking user exists or not
-        const addressExist = await addressModel.findById(addressId);
+        const address = await newAddress.save()
 
-        if (addressExist) {
-            //Update user data in database
-            const updatedAddress = await addressModel.findByIdAndUpdate(
-                addressId,
-                { $set: updatedData },
-                { new: true }
-            );
-            if (updatedAddress) {
-                res.json({ success: true, message: "Address has been updated !" })
-            }
-        } else {
-            return res.json({ success: false, message: 'Address doesn\'t exist' })
-        }
+        res.json({ success: true, message: "Address has been added !" })
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
-
 
 }
 
@@ -72,16 +60,16 @@ const putAddressActive = async (req,res) => {
 
 const updateAddress = async (req,res) => {
     try {
-        const { userId, selectedAddress } = req.body;
-
+        const { userId, formData } = req.body;
+        
         // Checking user exists or not
-        const addressExist = await addressModel.findById(selectedAddress._id);
+        const addressExist = await addressModel.findById(formData._id);
 
         if (addressExist) {
             //Update user data in database
             const updatedAddress = await addressModel.findByIdAndUpdate(
-                selectedAddress._id,
-                { $set: selectedAddress },
+                formData._id,
+                { $set: formData },
                 { new: true }
             );
             if (updatedAddress) {
