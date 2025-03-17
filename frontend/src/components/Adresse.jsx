@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import Title from "../components/Title";
 import { BsPencil } from "react-icons/bs";
-import FormAddress from "./formAddress";
+import FormAddress from "./FormAddress";
 import { MdOutlineDelete } from "react-icons/md";
 
 const Adresse = () => {
