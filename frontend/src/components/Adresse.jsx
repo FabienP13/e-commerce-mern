@@ -213,7 +213,7 @@ const Adresse = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="flex flex-col items-center w-full bg-white p-6 rounded-lg shadow-lg w-96">
+          <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg w-96">
             <FormAddress
               address={selectedAddress}
               closeModal={closeModal}
